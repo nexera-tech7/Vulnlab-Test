@@ -1,0 +1,105 @@
+<% const title = 'CSRF Lab' %>
+<%- include('../partials/head') %>
+
+<div class="lab-page">
+  <div class="lab-header">
+    <div class="breadcrumb"><a href="/">Dashboard</a> / CSRF</div>
+    <h1>
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      Cross-Site Request Forgery
+    </h1>
+    <p class="desc">Forge requests from a victim's authenticated browser session. The vulnerable endpoint accepts profile changes from any origin without verifying a CSRF token.</p>
+  </div>
+
+  <% if (!user) { %>
+    <div class="alert alert-warning">You need to <a href="/auth/login" style="color:var(--accent)">login</a> first to test CSRF.</div>
+  <% } %>
+
+  <div class="mode-toggle">
+    <button data-mode="vulnerable" class="active" onclick="setMode('vulnerable')">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/></svg>
+      Vulnerable
+    </button>
+    <button data-mode="fixed" onclick="setMode('fixed')">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      Fixed
+    </button>
+  </div>
+
+  <div class="info-box">
+    <h3>How it works</h3>
+    <ul>
+      <li><strong>Vulnerable:</strong> /api/profile accepts POST with just a session cookie, no CSRF token</li>
+      <li><strong>Attack:</strong> An attacker hosts an auto-submitting form targeting /api/profile</li>
+      <li><strong>Impact:</strong> Victim's email and bio get changed without their knowledge</li>
+      <li><strong>Fixed:</strong> Server generates a CSRF token, form includes it, server validates it</li>
+    </ul>
+  </div>
+
+  <h3 style="margin-bottom: 14px; font-size: 0.95rem;">Update Profile</h3>
+  <div class="form-group">
+    <label>Email</label>
+    <input type="email" id="csrf-email" placeholder="newemail@evil.com" value="hacked@evil.com">
+  </div>
+  <div class="form-group">
+    <label>Bio</label>
+    <textarea id="csrf-bio" placeholder="New bio...">Pwned by CSRF!</textarea>
+  </div>
+  <input type="hidden" id="csrf-token" value="<%= csrfToken %>">
+
+  <div style="display: flex; gap: 10px;">
+    <button class="btn btn-danger" onclick="submitCsrf('vulnerable')">Submit (No Token)</button>
+    <button class="btn btn-primary" onclick="submitCsrf('fixed')">Submit (With Token)</button>
+  </div>
+
+  <div class="json-output" id="csrf-output" style="margin-top: 18px; min-height: 60px;">Response will appear here...</div>
+
+  <div class="exploit-panel" style="margin-top: 22px">
+    <h3>
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+      Attacker's Malicious Page
+    </h3>
+    <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 12px">
+      An attacker hosts this HTML. When the victim visits, the form auto-submits:
+    </p>
+    <div class="code-block">
+      <div class="code-header vuln">Malicious HTML</div>
+      <pre><span class="comment">&lt;!-- Hosted on attacker's site --&gt;</span>
+&lt;body onload="document.forms[0].submit()"&gt;
+  &lt;form action="<span class="highlight">http://localhost:3000/api/profile</span>"
+        method="POST"&gt;
+    &lt;input name="email" value="<span class="highlight">attacker@evil.com</span>"&gt;
+    &lt;input name="bio" value="<span class="highlight">Account compromised</span>"&gt;
+  &lt;/form&gt;
+&lt;/body&gt;</pre>
+    </div>
+  </div>
+
+  <div class="code-compare">
+    <div class="code-block">
+      <div class="code-header vuln">Vulnerable Code</div>
+      <pre><span class="comment">// No CSRF token check</span>
+router.post(<span class="string">"/profile"</span>, (req, res) => {
+  <span class="comment">// Trusts session cookie alone</span>
+  <span class="highlight">db.run("UPDATE users SET email=?",
+    [req.body.email])</span>;
+});</pre>
+    </div>
+    <div class="code-block">
+      <div class="code-header safe">Fixed Code</div>
+      <pre><span class="comment">// Validate CSRF token</span>
+router.post(<span class="string">"/profile"</span>, (req, res) => {
+  <span class="safe-hl">if (req.body.csrf_token !==
+      req.session.csrfToken) {
+    return res.status(403).json({
+      error: "CSRF token invalid"
+    });
+  }</span>
+  db.run("UPDATE users SET email=?",
+    [req.body.email]);
+});</pre>
+    </div>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

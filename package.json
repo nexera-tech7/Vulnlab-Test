@@ -1,0 +1,17 @@
+{
+  "name": "vuln-lab",
+  "version": "1.0.0",
+  "description": "Deliberately vulnerable web application for security education",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "dependencies": {
+    "express": "^4.21.0",
+    "sql.js": "^1.11.0",
+    "express-session": "^1.18.0",
+    "ejs": "^3.1.10",
+    "helmet": "^7.1.0"
+  }
+}

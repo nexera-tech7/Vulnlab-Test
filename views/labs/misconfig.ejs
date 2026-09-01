@@ -1,0 +1,108 @@
+<% const title = 'Security Misconfiguration Lab' %>
+<%- include('../partials/head') %>
+
+<div class="lab-page">
+  <div class="lab-header">
+    <div class="breadcrumb"><a href="/">Dashboard</a> / Security Misconfiguration</div>
+    <h1>
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
+      Security Misconfiguration
+    </h1>
+    <p class="desc">Exposed debug endpoints leak environment variables, database credentials, the full user table with passwords, and internal stack traces. No authentication required.</p>
+  </div>
+
+  <div class="mode-toggle">
+    <button data-mode="vulnerable" class="active" onclick="setMode('vulnerable')">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/></svg>
+      Vulnerable
+    </button>
+    <button data-mode="fixed" onclick="setMode('fixed')">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      Fixed
+    </button>
+  </div>
+
+  <div class="info-box">
+    <h3>Misconfigurations Demonstrated</h3>
+    <ul>
+      <li><strong>Debug endpoint</strong> exposed in production with no authentication</li>
+      <li><strong>Verbose errors</strong> leak SQL queries and stack traces</li>
+      <li><strong>Hardcoded session secret</strong> in source code</li>
+      <li><strong>Cookie flags</strong> missing httpOnly and secure</li>
+    </ul>
+  </div>
+
+  <h3 style="margin-bottom: 14px; font-size: 0.95rem;">Debug Endpoint</h3>
+  <p style="color: var(--text-muted); font-size: 0.88rem; margin-bottom: 14px;">
+    Hit <code style="font-family: var(--mono); background: rgba(255,255,255,0.06); padding: 1px 6px; border-radius: 3px;">/api/debug</code> to see what gets exposed:
+  </p>
+
+  <button class="btn btn-danger" onclick="fetchDebug()">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+    Fetch /api/debug
+  </button>
+
+  <div class="json-output" id="misconfig-output" style="margin-top: 18px; min-height: 100px;">Response will appear here...</div>
+
+  <div class="exploit-panel" style="margin-top: 22px">
+    <h3>
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+      What Gets Leaked
+    </h3>
+    <div class="payload-item">
+      <div><strong style="color: var(--text-secondary)">process.env</strong><div class="desc">All environment variables</div></div>
+    </div>
+    <div class="payload-item">
+      <div><strong style="color: var(--text-secondary)">User database dump</strong><div class="desc">All users with plaintext passwords</div></div>
+    </div>
+    <div class="payload-item">
+      <div><strong style="color: var(--text-secondary)">Session secret</strong><div class="desc">Enables session forgery</div></div>
+    </div>
+    <div class="payload-item">
+      <div><strong style="color: var(--text-secondary)">Stack traces</strong><div class="desc">Internal file paths and Node.js version</div></div>
+    </div>
+  </div>
+
+  <div class="code-compare" style="margin-top: 22px">
+    <div class="code-block">
+      <div class="code-header vuln">Vulnerable</div>
+      <pre><span class="comment">// Debug endpoint with no auth</span>
+router.get(<span class="string">"/debug"</span>, (req, res) => {
+  res.json({
+    <span class="highlight">env: process.env</span>,
+    <span class="highlight">users: db.exec("SELECT * FROM users")</span>,
+    <span class="highlight">session_secret: "hardcoded-key"</span>,
+    <span class="highlight">stack: new Error().stack</span>
+  });
+});
+
+<span class="comment">// Hardcoded session secret</span>
+session({ secret: <span class="highlight">"hardcoded-secret-key-123"</span> });</pre>
+    </div>
+    <div class="code-block">
+      <div class="code-header safe">Fixed</div>
+      <pre><span class="comment">// Auth-gated, minimal info</span>
+router.get(<span class="string">"/debug"</span>, (req, res) => {
+  <span class="safe-hl">if (req.session.user?.role !== "admin")
+    return res.status(403);</span>
+  res.json({
+    status: <span class="string">"ok"</span>,
+    uptime: process.uptime()
+  });
+});
+
+<span class="comment">// Env variable for secret</span>
+session({ secret: <span class="safe-hl">process.env.SESSION_SECRET</span> });
+<span class="comment">// + helmet() for security headers</span></pre>
+    </div>
+  </div>
+</div>
+
+<script>
+function fetchDebug() {
+  const mode = document.getElementById('mode-input')?.value || 'vulnerable';
+  fetchApi(`/api/debug?mode=${mode}`, 'misconfig-output');
+}
+</script>
+
+<%- include('../partials/footer') %>

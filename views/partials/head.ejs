@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VulnLab - <%= typeof title !== 'undefined' ? title : 'Security Labs' %></title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<nav class="nav">
+  <a href="/" class="nav-brand">
+    <div class="brand-icon">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+    </div>
+    VulnLab
+  </a>
+  <div class="nav-links">
+    <a href="/">Dashboard</a>
+    <a href="/labs/sqli">SQLi</a>
+    <a href="/labs/xss">XSS</a>
+    <a href="/labs/csrf">CSRF</a>
+    <a href="/labs/idor">IDOR</a>
+    <a href="/labs/path-traversal">Traversal</a>
+    <a href="/labs/broken-auth">Auth</a>
+    <a href="/labs/misconfig">Misconfig</a>
+  </div>
+  <div class="nav-user">
+    <% if (user) { %>
+      <span class="badge"><%= user.role %></span>
+      <span><%= user.username %></span>
+      <a href="/auth/logout">Logout</a>
+    <% } else { %>
+      <a href="/auth/login">Login</a>
+    <% } %>
+  </div>
+</nav>

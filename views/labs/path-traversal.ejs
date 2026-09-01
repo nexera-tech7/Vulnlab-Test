@@ -1,0 +1,102 @@
+<% const title = 'Path Traversal Lab' %>
+<%- include('../partials/head') %>
+
+<div class="lab-page">
+  <div class="lab-header">
+    <div class="breadcrumb"><a href="/">Dashboard</a> / Path Traversal</div>
+    <h1>
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="m8 16 2-2-2-2"/><path d="M12 18h4"/></svg>
+      Path Traversal
+    </h1>
+    <p class="desc">Escape the intended uploads directory using ../ sequences to read arbitrary files from the server's filesystem. The vulnerable endpoint joins user input directly into a file path without sanitization.</p>
+  </div>
+
+  <div class="mode-toggle">
+    <button data-mode="vulnerable" class="active" onclick="setMode('vulnerable')">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/></svg>
+      Vulnerable
+    </button>
+    <button data-mode="fixed" onclick="setMode('fixed')">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      Fixed
+    </button>
+  </div>
+
+  <div class="info-box">
+    <h3>What to try</h3>
+    <ul>
+      <li>Fetch a legitimate file: <strong>readme.txt</strong></li>
+      <li>Escape with <code>../package.json</code> to read server config</li>
+      <li>Try <code>../server.js</code> to read server source code</li>
+      <li>Try <code>../db.js</code> to find database credentials</li>
+    </ul>
+  </div>
+
+  <h3 style="margin-bottom: 14px; font-size: 0.95rem;">Fetch File</h3>
+  <div style="display: flex; gap: 12px; align-items: end; flex-wrap: wrap;">
+    <div class="form-group" style="margin-bottom: 0; flex: 1; min-width: 200px;">
+      <label>Filename</label>
+      <input type="text" id="pt-file" value="readme.txt" placeholder="readme.txt">
+    </div>
+    <button class="btn btn-primary" onclick="fetchFile()" style="height: 42px;">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
+      Fetch
+    </button>
+  </div>
+
+  <div class="json-output" id="pt-output" style="margin-top: 18px; min-height: 80px;">Response will appear here...</div>
+
+  <div style="margin-top: 16px; display: flex; gap: 8px; flex-wrap: wrap;">
+    <button class="btn btn-outline" onclick="document.getElementById('pt-file').value='readme.txt'; fetchFile()">readme.txt</button>
+    <button class="btn btn-danger" onclick="document.getElementById('pt-file').value='../package.json'; fetchFile()">../package.json</button>
+    <button class="btn btn-danger" onclick="document.getElementById('pt-file').value='../server.js'; fetchFile()">../server.js</button>
+    <button class="btn btn-danger" onclick="document.getElementById('pt-file').value='../db.js'; fetchFile()">../db.js</button>
+  </div>
+
+  <div class="code-compare" style="margin-top: 28px">
+    <div class="code-block">
+      <div class="code-header vuln">Vulnerable Code</div>
+      <pre><span class="comment">// Directly joins user input into path</span>
+<span class="keyword">const</span> filePath = path.join(
+  __dirname, <span class="string">"uploads"</span>,
+  <span class="highlight">req.query.file</span>
+);
+res.sendFile(filePath);</pre>
+    </div>
+    <div class="code-block">
+      <div class="code-header safe">Fixed Code</div>
+      <pre><span class="comment">// Strip path components, validate</span>
+<span class="keyword">const</span> safeName = <span class="safe-hl">path.basename(filename)</span>;
+<span class="keyword">const</span> safePath = path.join(dir, safeName);
+<span class="keyword">const</span> resolved = path.resolve(safePath);
+
+<span class="safe-hl">if (!resolved.startsWith(uploadsDir))</span>
+  <span class="keyword">return</span> res.status(403)
+    .json({ error: <span class="string">"Blocked"</span> });</pre>
+    </div>
+  </div>
+</div>
+
+<script>
+async function fetchFile() {
+  const file = document.getElementById('pt-file').value;
+  const mode = document.getElementById('mode-input')?.value || 'vulnerable';
+  const output = document.getElementById('pt-output');
+  output.textContent = 'Loading...';
+  try {
+    const res = await fetch(`/api/files?file=${encodeURIComponent(file)}&mode=${mode}`);
+    const contentType = res.headers.get('content-type') || '';
+    if (contentType.includes('json')) {
+      const data = await res.json();
+      output.textContent = JSON.stringify(data, null, 2);
+    } else {
+      const text = await res.text();
+      output.textContent = text;
+    }
+  } catch (e) {
+    output.textContent = 'Error: ' + e.message;
+  }
+}
+</script>
+
+<%- include('../partials/footer') %>

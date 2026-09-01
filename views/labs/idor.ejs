@@ -1,0 +1,91 @@
+<% const title = 'IDOR Lab' %>
+<%- include('../partials/head') %>
+
+<div class="lab-page">
+  <div class="lab-header">
+    <div class="breadcrumb"><a href="/">Dashboard</a> / IDOR</div>
+    <h1>
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 9.9-1"/></svg>
+      Insecure Direct Object Reference
+    </h1>
+    <p class="desc">Access other users' private messages by guessing sequential IDs. The vulnerable API returns any message by ID without checking if the requesting user is the sender or recipient.</p>
+  </div>
+
+  <div class="mode-toggle">
+    <button data-mode="vulnerable" class="active" onclick="setMode('vulnerable')">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/></svg>
+      Vulnerable
+    </button>
+    <button data-mode="fixed" onclick="setMode('fixed')">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      Fixed
+    </button>
+  </div>
+
+  <div class="info-box">
+    <h3>What to try</h3>
+    <ul>
+      <li>Fetch message ID 1, 2, and 3 &mdash; you can read everyone's messages</li>
+      <li>Message 3 contains sensitive credentials sent between users</li>
+      <li>Switch to Fixed mode &mdash; it checks ownership before returning data</li>
+      <li>In Fixed mode, you must be logged in and can only see your own messages</li>
+    </ul>
+  </div>
+
+  <h3 style="margin-bottom: 14px; font-size: 0.95rem;">Fetch Message by ID</h3>
+  <div style="display: flex; gap: 12px; align-items: end; flex-wrap: wrap;">
+    <div class="form-group" style="margin-bottom: 0; flex: 1; min-width: 200px;">
+      <label>Message ID</label>
+      <input type="number" id="msg-id" value="1" min="1" max="10">
+    </div>
+    <button class="btn btn-primary" onclick="fetchMsg()" style="height: 42px;">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+      Fetch
+    </button>
+  </div>
+
+  <div class="json-output" id="idor-output" style="margin-top: 18px; min-height: 80px;">Response will appear here...</div>
+
+  <div style="margin-top: 16px; display: flex; gap: 8px; flex-wrap: wrap;">
+    <button class="btn btn-outline" onclick="document.getElementById('msg-id').value=1; fetchMsg()">Msg #1</button>
+    <button class="btn btn-outline" onclick="document.getElementById('msg-id').value=2; fetchMsg()">Msg #2</button>
+    <button class="btn btn-danger" onclick="document.getElementById('msg-id').value=3; fetchMsg()">Msg #3 (Credentials)</button>
+  </div>
+
+  <div class="code-compare" style="margin-top: 28px">
+    <div class="code-block">
+      <div class="code-header vuln">Vulnerable Code</div>
+      <pre><span class="comment">// No authentication or ownership check</span>
+router.get(<span class="string">"/messages/:id"</span>, (req, res) => {
+  <span class="highlight">const msg = db.exec(
+    `SELECT * FROM messages
+     WHERE id = ${req.params.id}`
+  );</span>
+  res.json(msg);  <span class="comment">// Returns any message</span>
+});</pre>
+    </div>
+    <div class="code-block">
+      <div class="code-header safe">Fixed Code</div>
+      <pre><span class="comment">// Auth check + ownership verification</span>
+router.get(<span class="string">"/messages/:id"</span>, (req, res) => {
+  <span class="safe-hl">if (!req.session.user)
+    return res.status(401);</span>
+  const stmt = db.prepare(
+    <span class="string">"SELECT * FROM messages WHERE id=?
+     AND (to_user=? OR from_user=?)"</span>
+  );
+  stmt.bind([id, <span class="safe-hl">user.id, user.id</span>]);
+});</pre>
+    </div>
+  </div>
+</div>
+
+<script>
+function fetchMsg() {
+  const id = document.getElementById('msg-id').value;
+  const mode = document.getElementById('mode-input')?.value || 'vulnerable';
+  fetchApi(`/api/messages/${id}?mode=${mode}`, 'idor-output');
+}
+</script>
+
+<%- include('../partials/footer') %>

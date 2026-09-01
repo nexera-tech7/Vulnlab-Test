@@ -1,0 +1,146 @@
+<% const title = 'Dashboard' %>
+<%- include('partials/head') %>
+
+<div class="container">
+  <div class="hero">
+    <h1>Vuln<span class="highlight">Lab</span></h1>
+    <p class="tagline">A deliberately vulnerable web application. Explore real-world vulnerabilities, understand how they work, and learn the fixes.</p>
+    <div class="stats">
+      <div class="stat"><strong>7</strong> Vulnerability Labs</div>
+      <div class="stat"><strong>OWASP</strong> Top 10 Coverage</div>
+      <div class="stat"><strong>Side-by-side</strong> Vuln vs Fix</div>
+    </div>
+  </div>
+
+  <div class="lab-grid">
+
+    <a href="/labs/sqli" class="lab-card">
+      <div class="card-top">
+        <div class="card-icon critical">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/><path d="M3 12c0 1.66 4 3 9 3s9-1.34 9-3"/></svg>
+        </div>
+        <div class="card-title-area">
+          <h3>SQL Injection</h3>
+          <span class="owasp-tag">A03:2021 &ndash; Injection</span>
+        </div>
+        <span class="severity-badge critical">Critical</span>
+      </div>
+      <p>Inject malicious SQL through unsanitized user input to dump database contents, bypass authentication, and extract sensitive data.</p>
+      <div class="card-bottom">
+        <span>String concat &rarr; Parameterized queries</span>
+        <span class="arrow"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></span>
+      </div>
+    </a>
+
+    <a href="/labs/xss" class="lab-card">
+      <div class="card-top">
+        <div class="card-icon critical">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m7 8-4 4 4 4"/><path d="m17 8 4 4-4 4"/><path d="m14 4-4 16"/></svg>
+        </div>
+        <div class="card-title-area">
+          <h3>Cross-Site Scripting</h3>
+          <span class="owasp-tag">A03:2021 &ndash; Injection</span>
+        </div>
+        <span class="severity-badge critical">Critical</span>
+      </div>
+      <p>Inject JavaScript through stored and reflected XSS vectors to steal cookies, redirect users, and deface pages.</p>
+      <div class="card-bottom">
+        <span>Raw output &rarr; Escaped output</span>
+        <span class="arrow"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></span>
+      </div>
+    </a>
+
+    <a href="/labs/csrf" class="lab-card">
+      <div class="card-top">
+        <div class="card-icon high">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        </div>
+        <div class="card-title-area">
+          <h3>Cross-Site Request Forgery</h3>
+          <span class="owasp-tag">A01:2021 &ndash; Broken Access Control</span>
+        </div>
+        <span class="severity-badge high">High</span>
+      </div>
+      <p>Forge requests from a victim's browser to change their profile data without their knowledge using crafted HTML forms.</p>
+      <div class="card-bottom">
+        <span>No token &rarr; CSRF tokens</span>
+        <span class="arrow"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></span>
+      </div>
+    </a>
+
+    <a href="/labs/idor" class="lab-card">
+      <div class="card-top">
+        <div class="card-icon high">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 9.9-1"/></svg>
+        </div>
+        <div class="card-title-area">
+          <h3>Insecure Direct Object Ref</h3>
+          <span class="owasp-tag">A01:2021 &ndash; Broken Access Control</span>
+        </div>
+        <span class="severity-badge high">High</span>
+      </div>
+      <p>Access other users' private messages by manipulating object IDs in API requests without authorization checks.</p>
+      <div class="card-bottom">
+        <span>No auth check &rarr; Ownership verification</span>
+        <span class="arrow"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></span>
+      </div>
+    </a>
+
+    <a href="/labs/broken-auth" class="lab-card">
+      <div class="card-top">
+        <div class="card-icon critical">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 7-6.5 6.5a1.5 1.5 0 0 0 3 3L18 10"/><path d="m2.5 21.5 3-3"/><path d="m18 2-4 4"/><path d="m2 6 4-4"/><path d="m21.5 21.5-3-3"/></svg>
+        </div>
+        <div class="card-title-area">
+          <h3>Broken Authentication</h3>
+          <span class="owasp-tag">A07:2021 &ndash; Identification Failures</span>
+        </div>
+        <span class="severity-badge critical">Critical</span>
+      </div>
+      <p>Exploit plaintext passwords, user enumeration, verbose errors, and insecure session configuration.</p>
+      <div class="card-bottom">
+        <span>Plaintext &rarr; Hashed + secure session</span>
+        <span class="arrow"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></span>
+      </div>
+    </a>
+
+    <a href="/labs/path-traversal" class="lab-card">
+      <div class="card-top">
+        <div class="card-icon high">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="m8 16 2-2-2-2"/><path d="M12 18h4"/></svg>
+        </div>
+        <div class="card-title-area">
+          <h3>Path Traversal</h3>
+          <span class="owasp-tag">A01:2021 &ndash; Broken Access Control</span>
+        </div>
+        <span class="severity-badge high">High</span>
+      </div>
+      <p>Escape the uploads directory using ../ sequences to read arbitrary files from the server filesystem.</p>
+      <div class="card-bottom">
+        <span>Raw path join &rarr; Path validation</span>
+        <span class="arrow"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></span>
+      </div>
+    </a>
+
+    <a href="/labs/misconfig" class="lab-card">
+      <div class="card-top">
+        <div class="card-icon medium">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
+        </div>
+        <div class="card-title-area">
+          <h3>Security Misconfiguration</h3>
+          <span class="owasp-tag">A05:2021 &ndash; Security Misconfiguration</span>
+        </div>
+        <span class="severity-badge medium">Medium</span>
+      </div>
+      <p>Exposed debug endpoints leak environment variables, credentials, full user database, and internal stack traces.</p>
+      <div class="card-bottom">
+        <span>Open debug &rarr; Auth-gated + minimal info</span>
+        <span class="arrow"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></span>
+      </div>
+    </a>
+
+  </div>
+</div>
+
+<%- include('partials/footer') %>

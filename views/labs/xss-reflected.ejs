@@ -1,0 +1,28 @@
+<% const title = 'Reflected XSS' %>
+<%- include('../partials/head') %>
+
+<div class="lab-page">
+  <div class="lab-header">
+    <div class="breadcrumb"><a href="/">Dashboard</a> / <a href="/labs/xss">XSS</a> / Reflected</div>
+    <h1>Reflected XSS Demo</h1>
+  </div>
+
+  <div class="result-box <%= mode === 'fixed' ? 'safe' : 'vulnerable' %>">
+    <h4 class="<%= mode === 'fixed' ? 'safe-label' : 'vuln-label' %>">
+      Search results for:
+    </h4>
+    <div style="padding: 12px; background: var(--bg-input); border-radius: var(--radius-sm); margin-top: 8px;">
+      <% if (mode === 'fixed') { %>
+        <%= query %>
+      <% } else { %>
+        <%- query %>
+      <% } %>
+    </div>
+  </div>
+
+  <div style="margin-top: 22px">
+    <a href="/labs/xss" class="btn btn-outline">&larr; Back to XSS Lab</a>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>
